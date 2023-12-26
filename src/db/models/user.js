@@ -74,6 +74,17 @@ userSchema.methods.generateTokenAndSave = async function () {
     await this.save()
     return token
 }
+/**
+ * this function customizes the user object before sending it to the client
+ * this function is called whenever JSON.stringify() is called.
+ * Express implicitly calls JSON.stringify() when res.send() is called.
+ */
+userSchema.methods.toJSON = function () {
+    const publicObject = this.toObject()
+    delete publicObject.password
+    delete publicObject.tokens
+    return publicObject
+}
 userSchema.pre('save', async function(next){
     const user = this
 

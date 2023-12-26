@@ -29,8 +29,8 @@ router.post('/users/login',async(req,res)=>{
 })
 router.post('/users/logout', auth, async(req, res)=>{
     try {
-        const user = req.body.user
-        const myToken = req.body.token
+        const user = req.user
+        const myToken = req.token
         user.tokens = user.tokens.filter((token)=> token.token != myToken )
         await user.save()
         res.send('logged Out')
@@ -41,7 +41,7 @@ router.post('/users/logout', auth, async(req, res)=>{
 
 router.post('/users/logoutAll', auth, async(req, res)=>{
     try {
-        const user = req.body.user
+        const user = req.user
         user.tokens = []
         await user.save()
         res.status(200).send('You have logged out of all sessions!')
@@ -54,24 +54,15 @@ router.post('/users/logoutAll', auth, async(req, res)=>{
 
 router.get('/users/me', auth, (req,res)=>{
     try {
-        res.send(req.body.user)
+        res.send(req.user)
     } catch (error) {
         res.status(401).send()
     }
 })
 
-router.get('/users/:id',(req,res)=>{
-    User.findOne({_id: new ObjectId(req.params.id)}).then((result=>{
-        if (!result) {
-            return res.status(404).send()
-        }
-        res.send(result)
-    })).catch(error=>{
-        res.status(500).send(error)
-    })
-})
-router.patch('/users/:id', async(req,res)=>{
 
+router.patch('/users/me', auth, async(req,res)=>{
+    
     const updates = Object.keys(req.body) //return an array of the keys in the object
     const allowedUpdates = ['name', 'age', 'email', 'password']
     const updatesValid = updates.every(update => allowedUpdates.includes(update))
@@ -82,14 +73,12 @@ router.patch('/users/:id', async(req,res)=>{
 
 
     try {
-        const user = await User.findById(req.params.id)
-        if (!user) {
-            return res.status(404).send('user not found!')
-        }
+        const user = req.user
         for (const update of updates) {
             user[update] = req.body[update]
         }
         await user.save()
+        
         res.send(user)
 
     } catch (error) {
@@ -100,13 +89,15 @@ router.patch('/users/:id', async(req,res)=>{
 
 
 })
-router.delete('/users/:id', (req, res)=>{
-    User.findByIdAndDelete(req.params.id).then(user=>{
-        if (!user) {
-            return res.status(404).send('user not found!')
-        }
+router.delete('/users/me', auth, async(req, res)=>{
+    try {
+        await User.deleteOne(req.user)
+        const {email} = req.body.user
         res.send(user)
-    }).catch(error=>res.status(500).send(error))
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error)
+    } 
 })
 
 
