@@ -2,7 +2,6 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 
-const { ObjectId } = require('mongodb')
 const userRouter = require('./routers/userRoute')
 const taskRouter = require('./routers/taskRoute')
 require('./db/mongoose')

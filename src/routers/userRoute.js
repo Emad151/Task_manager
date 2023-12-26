@@ -32,7 +32,7 @@ router.get('/users/:id',(req,res)=>{
         res.status(500).send(error)
     })
 })
-router.patch('/users/:id',(req,res)=>{
+router.patch('/users/:id', async(req,res)=>{
 
     const updates = Object.keys(req.body) //return an array of the keys in the object
     const allowedUpdates = ['name', 'age', 'email', 'password']
@@ -44,12 +44,30 @@ router.patch('/users/:id',(req,res)=>{
 
     //The option "new: true" in the "findByIdAndUpdate" function makes it 
     // return the new updated user instead of the default old 
-    User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true}).then(user=>{
+    // User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true}).then(user=>{
+    //     if (!user) {
+    //         return res.status(404).send('user not found!')
+    //     }
+    //     res.send(user)
+    // }).catch(e=>{res.status(500).send(e)})
+    try {
+        const user = await User.findById(req.params.id)
         if (!user) {
             return res.status(404).send('user not found!')
         }
+        for (const update of updates) {
+            user[update] = req.body[update]
+        }
+        await user.save()
         res.send(user)
-    }).catch(e=>{res.status(500).send(e)})
+
+    } catch (error) {
+        res.status(400).send(error)
+    }
+    
+
+
+
 })
 router.delete('/users/:id', (req, res)=>{
     User.findByIdAndDelete(req.params.id).then(user=>{
