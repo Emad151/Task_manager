@@ -2,6 +2,7 @@ const {Router} = require('express')
 const router = new Router()
 const User = require('../db/models/user')
 const { ObjectId } = require('mongodb')
+const auth = require('../middlewares/auth')
 
 
 
@@ -26,12 +27,12 @@ router.post('/users/login',async(req,res)=>{
     }
     
 })
-router.get('/users', (req,res)=>{
-    User.find({}).then((users)=>{
-        res.send(users)
-    }).catch((error=>{
-        res.status(500).send(error)
-    }))
+router.get('/users/me', auth, (req,res)=>{
+    try {
+        res.send(req.body.user)
+    } catch (error) {
+        res.status(401).send()
+    }
 })
 
 router.get('/users/:id',(req,res)=>{
