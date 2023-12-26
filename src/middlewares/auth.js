@@ -11,6 +11,7 @@ const Authorization = async function (req, res, next) {
         if (!user) {
             throw new Error('error: please authenticate!')
         }
+        req.body.token = token
         req.body.user = user
         next()
     } catch (error) {

@@ -27,6 +27,31 @@ router.post('/users/login',async(req,res)=>{
     }
     
 })
+router.post('/users/logout', auth, async(req, res)=>{
+    try {
+        const user = req.body.user
+        const myToken = req.body.token
+        user.tokens = user.tokens.filter((token)=> token.token != myToken )
+        await user.save()
+        res.send('logged Out')
+    } catch (error) {
+        res.status(401).send()
+    }
+})
+
+router.post('/users/logoutAll', auth, async(req, res)=>{
+    try {
+        const user = req.body.user
+        user.tokens = []
+        await user.save()
+        res.status(200).send('You have logged out of all sessions!')
+
+    } catch (error) {
+        res.status(500).send('please authenticate!')
+    }
+
+})
+
 router.get('/users/me', auth, (req,res)=>{
     try {
         res.send(req.body.user)
