@@ -6,18 +6,21 @@ const { ObjectId } = require('mongodb')
 
 
 
-router.post('/users', (req, res) =>{
-    const user = new User(req.body)
-    user.save().then(result => {
-        res.status(201).send(result)
-    }).catch(error => {
+router.post('/users', async(req, res) =>{
+    try {
+       const user = new User(req.body)
+    const token = await user.generateTokenAndSave()
+    res.status(201).send({user, token})
+    } catch (error) {
         res.status(400).send(error)
-    })
+    }
+    
 })
 router.post('/users/login',async(req,res)=>{
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
-        res.send(user)
+        const token = await user.generateTokenAndSave()
+        res.send({user, token})
     } catch (error) {
         res.status(400).send(error)
     }

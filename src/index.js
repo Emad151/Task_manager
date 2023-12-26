@@ -6,7 +6,10 @@ const userRouter = require('./routers/userRoute')
 const taskRouter = require('./routers/taskRoute')
 require('./db/mongoose')
 
-
+//Maintenance mode middleware
+// app.use((req, res, next)=>{
+//     res.status(503).send('the website is temporarily unavailable!')
+// })
 app.use(express.json())
 app.use(userRouter)
 app.use(taskRouter)
