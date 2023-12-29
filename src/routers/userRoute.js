@@ -1,6 +1,7 @@
 const {Router} = require('express')
 const router = new Router()
 const User = require('../db/models/user')
+const Task = require('../db/models/task')
 const { ObjectId } = require('mongodb')
 const auth = require('../middlewares/auth')
 
@@ -13,7 +14,7 @@ router.post('/users', async(req, res) =>{
     const token = await user.generateTokenAndSave()
     res.status(201).send({user, token})
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error: error.message})
     }
     
 })
@@ -23,7 +24,7 @@ router.post('/users/login',async(req,res)=>{
         const token = await user.generateTokenAndSave()
         res.send({user, token})
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error: error.message})
     }
     
 })
@@ -35,7 +36,7 @@ router.post('/users/logout', auth, async(req, res)=>{
         await user.save()
         res.send('logged Out')
     } catch (error) {
-        res.status(401).send()
+        res.status(401).send({error: error.message})
     }
 })
 
@@ -56,7 +57,7 @@ router.get('/users/me', auth, (req,res)=>{
     try {
         res.send(req.user)
     } catch (error) {
-        res.status(401).send()
+        res.status(401).send({error: error.message})
     }
 })
 
@@ -82,7 +83,7 @@ router.patch('/users/me', auth, async(req,res)=>{
         res.send(user)
 
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error: error.message})
     }
     
 
@@ -91,12 +92,13 @@ router.patch('/users/me', auth, async(req,res)=>{
 })
 router.delete('/users/me', auth, async(req, res)=>{
     try {
-        await User.deleteOne(req.user)
-        const {email} = req.body.user
-        res.send(user)
+        const user = req.user
+        await Task.deleteMany({owner: user._id})
+        await User.deleteOne({_id:user._id})
+        res.send(`user deleted successfully!`)
     } catch (error) {
         console.log(error);
-        res.status(500).send(error)
+        res.status(500).send({error: error.message})
     } 
 })
 

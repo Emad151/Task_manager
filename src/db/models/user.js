@@ -51,6 +51,11 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
+})
 /**
  * find user data using email and password
  * @param {string} email 
