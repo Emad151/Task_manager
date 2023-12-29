@@ -15,10 +15,33 @@ router.post('/tasks',auth ,(req,res)=>{
         res.status(400).send({error: error.message})
     })
 })
+
+/**
+ * GET /tasks?complete=true
+ * GET /tasks?limit=2&skip=0
+ * GET /tasks?sortedBy=createdAt:desc
+ */
 router.get('/tasks', auth, async(req,res)=>{
     try {
         const user = req.user
-        await user.populate('tasks')
+        let match = {}
+        let sort = {}
+        if (req.query.complete) {
+            match.complete = req.query.complete === 'true'
+        }
+        if (req.query.sortedBy) {
+            const parts = req.query.sortedBy.split(':')
+            sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+        }
+        await user.populate({
+            path: 'tasks',
+            match,
+            options:{
+                limit: parseInt(req.query.limit), //if 'limit' is undefined, 'parseInt' will return NaN so it won't cause a problem 
+                skip: parseInt(req.query.skip),
+                sort // 1 for ascending, -1 for descending  e.g: {createdAt: -1}
+            }
+        })
     if (user.tasks.length == 0) {
         return res.status(404).send('you have no tasks to do!')
     }
