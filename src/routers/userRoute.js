@@ -5,6 +5,7 @@ const Task = require('../db/models/task')
 const { ObjectId } = require('mongodb')
 const auth = require('../middlewares/auth')
 const multer = require('multer')
+const sharp = require('sharp')
 
 
 
@@ -115,7 +116,8 @@ const upload = multer({
     }
 })
 router.post('/users/me/avatar', auth, upload.single('avatar'), async(req, res)=>{
-    req.user.avatar = req.file.buffer
+    const buffer = await sharp(req.file.buffer).resize({width:250, height:250}).png().toBuffer()
+    req.user.avatar = buffer
     await req.user.save()
     res.send('image uploaded!')
 }, (error, req, res, next)=>{
@@ -128,6 +130,21 @@ router.delete('/users/me/avatar', auth, async(req,res)=>{
         res.send()
     } catch (error) {
         res.status(400).send({error: error.message})
+    }
+    
+})
+
+// http://localhost:3000/users/me/658edc02bffedc2b5d0daecc/avatar
+router.get('/users/me/:id/avatar', async(req, res)=>{
+    try {
+        const user = await User.findById(req.params.id)
+        if (!user || !user.avatar) {
+        throw new Error()
+    }
+    res.set('Content-Type', 'image/png')
+    res.send(user.avatar)
+    } catch (error) {
+        res.status(404).send()
     }
     
 })

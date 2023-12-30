@@ -93,6 +93,7 @@ userSchema.methods.toJSON = function () {
     const publicObject = this.toObject()
     delete publicObject.password
     delete publicObject.tokens
+    delete publicObject.avatar
     return publicObject
 }
 userSchema.pre('save', async function(next){
