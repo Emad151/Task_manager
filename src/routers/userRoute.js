@@ -4,6 +4,7 @@ const User = require('../db/models/user')
 const Task = require('../db/models/task')
 const { ObjectId } = require('mongodb')
 const auth = require('../middlewares/auth')
+const multer = require('multer')
 
 
 
@@ -100,6 +101,35 @@ router.delete('/users/me', auth, async(req, res)=>{
         console.log(error);
         res.status(500).send({error: error.message})
     } 
+})
+
+const upload = multer({
+    limits:{
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb){
+        if (file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+           return cb(null, true)
+        }
+        cb(new Error('only jpg, jpeg and png are accepted file extensions!')) 
+    }
+})
+router.post('/users/me/avatar', auth, upload.single('avatar'), async(req, res)=>{
+    req.user.avatar = req.file.buffer
+    await req.user.save()
+    res.send('image uploaded!')
+}, (error, req, res, next)=>{
+    res.status(400).send({error: error.message})
+})
+router.delete('/users/me/avatar', auth, async(req,res)=>{
+    try {
+        req.user.avatar = undefined
+        await req.user.save()
+        res.send()
+    } catch (error) {
+        res.status(400).send({error: error.message})
+    }
+    
 })
 
 
