@@ -1,12 +1,13 @@
 const jwt = require('jsonwebtoken')
 const User = require('../db/models/user')
+const JWT_SECRET = process.env.TOKEN_SECRET
 
 
 
 const Authorization = async function (req, res, next) {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
-        const payload = jwt.verify(token, 'mysecret')
+        const payload = jwt.verify(token, JWT_SECRET)
         const user = await User.findOne({_id: payload._id, 'tokens.token': token})
         if (!user) {
             throw new Error('error: please authenticate!')

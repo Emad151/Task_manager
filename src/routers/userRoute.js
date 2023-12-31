@@ -2,10 +2,9 @@ const {Router} = require('express')
 const router = new Router()
 const User = require('../db/models/user')
 const Task = require('../db/models/task')
-const { ObjectId } = require('mongodb')
 const auth = require('../middlewares/auth')
-const multer = require('multer')
-const sharp = require('sharp')
+const multer = require('multer') //for file uploading
+const sharp = require('sharp') //for image processing
 
 
 
