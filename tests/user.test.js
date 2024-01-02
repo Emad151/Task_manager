@@ -1,28 +1,16 @@
-const jwt = require("jsonwebtoken")
-const { default: mongoose } = require("mongoose")
 const request = require("supertest")
 const app = require('../src/app')
-const { findById } = require("../src/db/models/user")
 const User = require("../src/db/models/user")
+const {userOneId, userOne, setUpDatabase} = require('./fixtures/db')
 
+beforeEach(setUpDatabase)
+// User Test Ideas
+//
+// Should not signup user with invalid name/email/password
+// Should not update user if unauthenticated
+// Should not update user with invalid name/email/password
+// Should not delete user if unauthenticated
 
-const userOneId = new mongoose.Types.ObjectId()
-//user to save in the database before each test case
-userOne = {
-    _id: userOneId,
-    name:'emad',
-    age:25,
-    email:'emad@example.com',
-    password:'123456789',
-    tokens:[
-        {token: jwt.sign({_id: userOneId}, process.env.JWT_SECRET)}
-    ]
-}
-
-beforeEach(async()=>{
-    await User.deleteMany()
-    await new User(userOne).save()
-})
 
 
 test('should create new user', async() => { 

@@ -37,7 +37,7 @@ router.get('/tasks', auth, async(req,res)=>{
             path: 'tasks',
             match,
             options:{
-                limit: parseInt(req.query.limit), //if 'limit' is undefined, 'parseInt' will return NaN so it won't cause a problem 
+                limit: parseInt(req.query.limit), //if 'limit' is undefined, 'parseInt' will return NaN so it won't provide a limit, it won't cause a problem 
                 skip: parseInt(req.query.skip),
                 sort // 1 for ascending, -1 for descending  e.g: {createdAt: -1}
             }
